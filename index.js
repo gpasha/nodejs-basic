@@ -1,16 +1,38 @@
 const http = require('http')
 
 const server = http.createServer((req, res) => {
-    console.log('server created, req.url: ', req.url);
+    if (req.method === 'GET') {
+        res.writeHead(200, "", {
+            'Content-type': 'text/html; charset=utf-8;'
+        })
+        res.end(`
+            <h1>FORM:</h1>
+            <form method="post" action="/">
+                <input type="text" name="title" />
+                <button type="submit">Send</button>
+            </form>
+        `)
+    }
+    else if (req.method === 'POST') {
+        res.writeHead(200, {
+            'Content-type': 'text/html; charset=utf-8'
+        })
 
-    res.write('<h1>Hi from NodeJS!</h1>')
-    res.write('<h2>Hi from NodeJS!</h2>')
-    res.write('<h3>Hi from NodeJS!</h3>')
-    res.end(
-        `<div style="background:red; width:200px; height:200px;">
-            <h1>Test text</h1>
-        </div>`
-    )
+        const body = []
+
+        req.on('data', data =>{
+            body.push(Buffer.from(data))
+        })
+
+        req.on('end', () => {
+            const result = body.toString().split('=')[1]
+            
+
+            res.end(`
+                <h1>FORM result: ${result.replace('+', ' ')}</h1>
+            `)
+        })
+    }
 })
 
 server.listen(3000, () => {
